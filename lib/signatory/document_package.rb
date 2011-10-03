@@ -21,6 +21,11 @@ module Signatory
           }
         })
       end
+      if opts[:document_data].present?
+ 	      attributes.merge!({
+ 	        'callback_location' => opts[:callback_location]
+ 	      })
+ 	    end
 
       doc = connection.format.decode(connection.post("/api/templates.xml", self.to_xml).body)
       Document.find(doc['guid'])
