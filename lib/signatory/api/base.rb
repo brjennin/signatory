@@ -7,6 +7,21 @@ module Signatory
         guid
       end
 
+      def post(method_name, options = {}, body = nil)
+        request_body = body
+        if new?
+          uri = custom_method_new_element_url(method_name, options)
+        else
+          uri = custom_method_element_url(method_name, options)
+        end
+
+        Signatory.credentials.token.post(uri,request_body,self.class.headers)
+      end
+
+      def get(method_name, options = {})
+        self.class.format.decode(Signatory.credentials.token.get(custom_method_element_url(method_name, options)).body)
+      end
+
       class << self
         def escape_url_attrs(*attrs)
           attrs.each do |attr|
