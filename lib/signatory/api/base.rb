@@ -2,24 +2,38 @@ module Signatory
   module API
     class Base < ActiveResource::Base
       self.site = 'https://rightsignature.com/api/'
+      self.format = ActiveResource::Formats::XmlFormat
 
       def id
         guid
       end
 
+      def self.headers
+        {'Content-Type'=>'text/xml'}
+      end
+
+      def self.find(guid)
+        record = self.format.decode(Signatory.credentials.token.get("#{self.site}#{self.collection_name}/#{guid}.#{self.format.extension}",self.headers).body)
+
+        self.send(:instantiate_record, record)
+      end
+
       def post(method_name, options = {}, body = nil)
-        request_body = body
+        content_type = body.blank? ? "application/x-www-form-urlencoded" : "text/xml"
+
+        debugger
+
         if new?
           uri = custom_method_new_element_url(method_name, options)
         else
           uri = custom_method_element_url(method_name, options)
         end
 
-        Signatory.credentials.token.post(uri,request_body,self.class.headers)
+        Signatory.credentials.token.post(uri,body,{'Content-Type'=>content_type})
       end
 
       def get(method_name, options = {})
-        self.class.format.decode(Signatory.credentials.token.get(custom_method_element_url(method_name, options)).body)
+        self.class.format.decode(Signatory.credentials.token.get(custom_method_element_url(method_name,self.class.headers)).body)
       end
 
       class << self
@@ -71,6 +85,7 @@ module Signatory
             @connection.auth_type = auth_type if auth_type
             @connection.timeout = timeout if timeout
             @connection.ssl_options = ssl_options if ssl_options
+            @connection.format = ActiveResource::Formats::XmlFormat
             @connection
           else
             superclass.connection
