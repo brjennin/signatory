@@ -13,27 +13,9 @@ module Signatory
       end
 
       def self.find(guid)
-        record = self.format.decode(Signatory.credentials.token.get("#{self.site}#{self.collection_name}/#{guid}.#{self.format.extension}",self.headers).body)
+        record = self.format.decode(connection.get("#{self.site}#{self.collection_name}/#{guid}.#{self.format.extension}",self.headers).body)
 
         self.send(:instantiate_record, record)
-      end
-
-      def post(method_name, options = {}, body = nil)
-        content_type = body.blank? ? "application/x-www-form-urlencoded" : "text/xml"
-
-        debugger
-
-        if new?
-          uri = custom_method_new_element_url(method_name, options)
-        else
-          uri = custom_method_element_url(method_name, options)
-        end
-
-        Signatory.credentials.token.post(uri,body,{'Content-Type'=>content_type})
-      end
-
-      def get(method_name, options = {})
-        self.class.format.decode(Signatory.credentials.token.get(custom_method_element_url(method_name,self.class.headers)).body)
       end
 
       class << self
