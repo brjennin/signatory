@@ -17,6 +17,22 @@ module Signatory
 
         self.send(:instantiate_record, record)
       end
+      
+      def post(method_name, options = {}, body = nil)
+        content_type = body.blank? ? "application/x-www-form-urlencoded" : "text/xml"
+
+        if new?
+          uri = custom_method_new_element_url(method_name, options)
+        else
+          uri = custom_method_element_url(method_name, options)
+        end
+
+        Signatory.credentials.token.post(uri,body,{'Content-Type'=>content_type})
+      end
+
+      def get(method_name, options = {})
+        self.class.format.decode(Signatory.credentials.token.get(custom_method_element_url(method_name,options),self.class.headers).body)
+      end
 
       class << self
         def escape_url_attrs(*attrs)
