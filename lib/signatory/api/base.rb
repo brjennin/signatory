@@ -13,7 +13,7 @@ module Signatory
       end
 
       def self.find(guid)
-        record = self.format.decode(connection.get("#{self.site}#{self.collection_name}/#{guid}.#{self.format.extension}",self.headers).body)
+        record = self.format.decode(Signatory.credentials.token.get("#{self.site}#{self.collection_name}/#{guid}.#{self.format.extension}",self.headers).body)
 
         self.send(:instantiate_record, record)
       end
