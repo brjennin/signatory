@@ -27,7 +27,7 @@ module Signatory
  	      })
  	    end
 
-      doc = connection.format.decode(connection.post("/api/templates.xml", self.to_xml).body)
+      doc = connection.format.decode(Signatory.credentials.token.post("/api/templates.xml", self.to_xml,{'Content-Type'=>'text/xml'}).body)
       Document.find(doc['guid'])
     end
 
