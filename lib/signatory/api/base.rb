@@ -17,7 +17,7 @@ module Signatory
 
         self.send(:instantiate_record, record)
       end
-      
+
       def post(method_name, options = {}, body = nil)
         content_type = body.blank? ? "application/x-www-form-urlencoded" : "text/xml"
 
@@ -48,11 +48,13 @@ module Signatory
         end
 
         def has_many(sym)
-          self.write_inheritable_attribute(:__has_many, (read_inheritable_attribute(:__has_many)||[])+[sym])
+          class_attribute :__has_many
+          self.__has_many = (self.__has_many||[])+[sym]
         end
 
         def instantiate_record(record, opts={})
-          (self.read_inheritable_attribute(:__has_many)||[]).each do |sym|
+          class_attribute :__has_many
+          (self.__has_many||[]).each do |sym|
             record[sym.to_s] = [record[sym.to_s].try(:[],sym.to_s.singularize)].flatten.compact unless record[sym.to_s].is_a?(Array)
           end
 
