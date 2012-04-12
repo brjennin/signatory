@@ -4,6 +4,8 @@ module Signatory
       self.site = 'https://rightsignature.com/api/'
       self.format = ActiveResource::Formats::XmlFormat
 
+      class_attribute :__has_many
+
       def id
         guid
       end
@@ -35,6 +37,7 @@ module Signatory
       end
 
       class << self
+
         def escape_url_attrs(*attrs)
           attrs.each do |attr|
             define_method attr do
@@ -48,12 +51,10 @@ module Signatory
         end
 
         def has_many(sym)
-          class_attribute :__has_many
           self.__has_many = (self.__has_many||[])+[sym]
         end
 
         def instantiate_record(record, opts={})
-          class_attribute :__has_many
           (self.__has_many||[]).each do |sym|
             record[sym.to_s] = [record[sym.to_s].try(:[],sym.to_s.singularize)].flatten.compact unless record[sym.to_s].is_a?(Array)
           end
